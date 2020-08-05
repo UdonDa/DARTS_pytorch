@@ -7,6 +7,11 @@ This repository is a non-official implementation.
 2. Set the output of training script to `genotype` parameters in `scripts/2_augment.sh`
 2. Run `bash scripts/2_augment.sh`
 
+# Results
+| CIFAR-10 | Final validation acc | Best validation acc |
+| ------- | -------------------- | ------------------- |
+| [Original](https://github.com/quark0/darts)         | 97.17% | 97.23% |
+| Ours | 96.39% | 96.87% |
 
 # Causion
 + My implementation can not handle multiple-gpu training.
