@@ -8,3 +8,15 @@ This repository is a non-official implementation.
 2. Run `bash scripts/2_augment.sh`
 
 
+# Causion
++ My implementation can not handle multiple-gpu training.
+
+# Acknowledgements
+```
+@article{liu2018darts,
+  title={DARTS: Differentiable Architecture Search},
+  author={Liu, Hanxiao and Simonyan, Karen and Yang, Yiming},
+  journal={arXiv preprint arXiv:1806.09055},
+  year={2018}
+}
+```
