@@ -1,3 +1,5 @@
+import torch
+import torch.nn as nn
 import utils
 
 def train(train_loader, valid_loader, model, architect, w_optim, alpha_optim, lr, epoch, config, writer, logger):
@@ -11,8 +13,8 @@ def train(train_loader, valid_loader, model, architect, w_optim, alpha_optim, lr
     model.train()
 
     for step, ((trn_X, trn_y), (val_X, val_y)) in enumerate(zip(train_loader, valid_loader)):
-        trn_X, trn_y = trn_X.to(device, non_blocking=True), trn_y.to(device, non_blocking=True)
-        val_X, val_y = val_X.to(device, non_blocking=True), val_y.to(device, non_blocking=True)
+        trn_X, trn_y = trn_X.to(config.device, non_blocking=True), trn_y.to(config.device, non_blocking=True)
+        val_X, val_y = val_X.to(config.device, non_blocking=True), val_y.to(config.device, non_blocking=True)
         N = trn_X.size(0)
 
         # phase 2. architect step (alpha)
@@ -49,7 +51,7 @@ def train(train_loader, valid_loader, model, architect, w_optim, alpha_optim, lr
     logger.info("Train: [{:2d}/{}] Final Prec@1 {:.4%}".format(epoch+1, config.epochs, top1.avg))
 
 
-@torch.no_grad():
+@torch.no_grad()
 def validate(valid_loader, model, epoch, cur_step, config, writer, logger):
     top1 = utils.AverageMeter()
     top5 = utils.AverageMeter()
@@ -59,7 +61,7 @@ def validate(valid_loader, model, epoch, cur_step, config, writer, logger):
 
 
     for step, (X, y) in enumerate(valid_loader):
-        X, y = X.to(device, non_blocking=True), y.to(device, non_blocking=True)
+        X, y = X.to(config.device, non_blocking=True), y.to(config.device, non_blocking=True)
         N = X.size(0)
 
         logits = model(X)

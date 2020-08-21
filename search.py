@@ -13,20 +13,19 @@ from solvers.search import train, validate
 
 def main(config, writer, logger):
     logger.info("Logger is set - training search start")
-    
-    # get data with meta info
+
     input_size, input_channels, n_classes, train_data = utils.get_data(
         config.dataset, config.data_path, cutout_length=0, validation=False)
 
-    net_crit = nn.CrossEntropyLoss().to(device)
-    model = SearchCNNController(input_channels, config.init_channels, n_classes, config.layers, net_crit).to(device)
+    net_crit = nn.CrossEntropyLoss().to(config.device)
+    model = SearchCNNController(input_channels, config.init_channels, n_classes, config.layers, net_crit).to(config.device)
 
     # weights optimizer
     w_optim = torch.optim.SGD(model.weights(), config.w_lr, momentum=config.w_momentum,
-                              weight_decay=config.w_weight_decay)
+                                    weight_decay=config.w_weight_decay)
     # alphas optimizer
-    alpha_optim = torch.optim.Adam(model.alphas(), config.alpha_lr, betas=(alpha_beta1, alpha_beta2),
-                                   weight_decay=config.alpha_weight_decay)
+    alpha_optim = torch.optim.Adam(model.alphas(), config.alpha_lr, betas=(config.alpha_beta1, config.alpha_beta2),
+                                    weight_decay=config.alpha_weight_decay)
 
     # split data to train/validation
     n_train = len(train_data)
@@ -35,15 +34,15 @@ def main(config, writer, logger):
     train_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices[:split])
     valid_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices[split:])
     train_loader = torch.utils.data.DataLoader(train_data,
-                                               batch_size=config.batch_size,
-                                               sampler=train_sampler,
-                                               num_workers=config.workers,
-                                               pin_memory=True)
+                                                batch_size=config.batch_size,
+                                                sampler=train_sampler,
+                                                num_workers=config.workers,
+                                                pin_memory=True)
     valid_loader = torch.utils.data.DataLoader(train_data,
-                                               batch_size=config.batch_size,
-                                               sampler=valid_sampler,
-                                               num_workers=config.workers,
-                                               pin_memory=True)
+                                                batch_size=config.batch_size,
+                                                sampler=valid_sampler,
+                                                num_workers=config.workers,
+                                                pin_memory=True)
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(w_optim, config.epochs, eta_min=config.w_lr_min)
     architect = Architect(model, config.w_momentum, config.w_weight_decay)
 
@@ -87,16 +86,16 @@ def main(config, writer, logger):
 
 
 if __name__ == "__main__":
-    
+
     config = SearchConfig()
-    
+
     # set gpu id
     if torch.cuda.is_available():
-        if len(config.gpu) > 1:
+        if len(config.gpus) > 1:
             raise NotImplementedError('This implementation only supports single GPU.')
-        device = torch.device("cuda:{}".format(config.gpu))
+        config.device = torch.device("cuda:{}".format(config.gpus))
     else:
-        device = torch.device("cpu")
+        config.device = torch.device("cpu")
 
     # set tensorboard
     writer = SummaryWriter(log_dir=os.path.join(config.path, "tb"))
@@ -105,8 +104,7 @@ if __name__ == "__main__":
     # set logger
     logger = utils.get_logger(os.path.join(config.path, "{}.log".format(config.name)))
     config.print_params(logger.info)
-    
-    
+
     # set seed
     np.random.seed(config.seed)
     torch.manual_seed(config.seed)

@@ -74,7 +74,7 @@ if __name__ == "__main__":
     
     # set gpu id
     if torch.cuda.is_available():
-        if len(config.gpu) > 1:
+        if len(config.gpus) > 1:
             raise NotImplementedError('This implementation supports single GPU.')
     else:
         raise NotImplementedError('This implementation supports CPU.')
